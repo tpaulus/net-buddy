@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "net-buddy"
+version = "0.1.0"
+description = ""
+authors = ["Tom Paulus <tom@tompaulus.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.13"
+gspread = "^6.1.4"
+npyscreen = "^4.10.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+net-buddy = "main"
