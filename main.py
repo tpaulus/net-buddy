@@ -1,6 +1,7 @@
 import sys
+from collections import namedtuple
 from copy import copy
-from typing import Optional
+from typing import Optional, List, Tuple, cast
 
 import npyscreen
 import gspread
@@ -9,7 +10,7 @@ from datetime import datetime
 from gspread.utils import rowcol_to_a1, Dimension
 
 # Google Sheets Setup
-SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1OopTFBHSx3TWb1ANjdAHr-rpfO-7ImbwpIpwLJ8oLXY/edit?usp=sharing"
+SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/10_0nWXD5xs0Pm7ruD7d5l4KzRnNjyW3VB4SX2BLHUe0/edit?usp=sharing"
 
 gc = gspread.oauth(
     credentials_filename='client_secrets.json',
@@ -130,7 +131,6 @@ class EarlyCheckins(npyscreen.FormBaseNew):
                     self.parentApp.switchForm('NEW_OPERATOR')
 
             self.call_sign.value = None
-            self.call_sign.focus = True
             self.display()
         except gspread.exceptions.APIError as e:
             npyscreen.notify_confirm(f"Error: {e}", title="API Error")
@@ -169,11 +169,11 @@ class NewOperator(npyscreen.ActionForm):
         self.parentApp.switchFormPrevious()
 
 
+OperatorRow = namedtuple("OperatorRow", "callsign row_idx")
 
 class MemberList(npyscreen.MultiSelect):
-
     def display_value(self, vl):
-        member_name = get_member_name(str(vl))
+        member_name = get_member_name(cast(OperatorRow, vl).callsign)
         if member_name:
             return member_name
         return vl
@@ -187,15 +187,16 @@ class RollCall(npyscreen.FormBaseNew):
         self.add(npyscreen.ButtonPress, name="Save & Return to Main Menu", when_pressed_function=self.back_to_main)
 
     def beforeEditing(self):
-        self.members.values = []  # List of options
+        self.members.values = []  # List of options (callsign, row_idx)
         self.members.value = []  # Index of selected options
 
         global all_rows
         all_rows = sheet.get_all_values()
 
         num_rows = len(all_rows)
-        for i, row in enumerate(range(2, num_rows)):
+        for row in range(2, num_rows):
             name = all_rows[row][0]
+
             if "Do not announce" in name:
                 # We have reached the end of the roll-call list
                 break
@@ -204,7 +205,7 @@ class RollCall(npyscreen.FormBaseNew):
             if not call_sign:
                 continue
 
-            self.members.values.append(call_sign)
+            self.members.values.append(OperatorRow(call_sign, row + 1))  # The Sheets row is 1 indexed, while the iterator is 0 indexed
             if is_checked_in(call_sign):
                 self.members.value.append(len(self.members.values) - 1)
 
@@ -212,9 +213,17 @@ class RollCall(npyscreen.FormBaseNew):
         self.editing = False
 
         # Save checkins
-        sheet.update(
-            [["X"] if i in self.members.value else [""] for i in range(len(self.members.values))],
-f"{rowcol_to_a1(3, current_week_col_1idx)}:{rowcol_to_a1(3 + len(self.members.values), current_week_col_1idx)}")
+        min_operator_row = min([cast(OperatorRow, op).row_idx for op in self.members.values])
+        max_operator_row = max([cast(OperatorRow, op).row_idx for op in self.members.values])
+        updated_column_values = [[""] for _ in range(max_operator_row - min_operator_row + 1)]
+
+        for i, operator in enumerate(self.members.values):
+            r = cast(OperatorRow, operator).row_idx - min_operator_row
+
+            updated_column_values[r] = ["X"] if i in self.members.value else [""]
+
+        sheet.update(updated_column_values,
+f"{rowcol_to_a1(min_operator_row, current_week_col_1idx)}:{rowcol_to_a1(min_operator_row + len(updated_column_values), current_week_col_1idx)}")
 
         # Return
         self.parentApp.setNextForm("MAIN")
