@@ -10,7 +10,7 @@ from datetime import datetime
 from gspread.utils import rowcol_to_a1, Dimension
 
 # Google Sheets Setup
-SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/10_0nWXD5xs0Pm7ruD7d5l4KzRnNjyW3VB4SX2BLHUe0/edit?usp=sharing"
+SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1tiuOeuGH0EszzLcHwDnT0AJ6GyVsykuLKK0TVGHDm4U/edit?usp=sharing"
 
 gc = gspread.oauth(
     credentials_filename='client_secrets.json',
@@ -197,7 +197,7 @@ class RollCall(npyscreen.FormBaseNew):
         for row in range(2, num_rows):
             name = all_rows[row][0]
 
-            if "Do not announce" in name:
+            if "Not Necessary to Call" in name:
                 # We have reached the end of the roll-call list
                 break
 
