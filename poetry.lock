@@ -203,13 +203,14 @@ all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2
 
 [[package]]
 name = "npyscreen"
-version = "4.10.5"
+version = "5.0.2"
 description = "Writing user interfaces without all that ugly mucking about in hyperspace"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "npyscreen-4.10.5.tar.gz", hash = "sha256:622ee0f9a5dae946e635b7c6e0f6d65e1ed3c9ea0d20b89dab7f58d580e5126e"},
+    {file = "npyscreen-5.0.2-py3-none-any.whl", hash = "sha256:af02fbea2c5ab6d170563d7738a655b28afaddae2849edcd1b8931016d486753"},
+    {file = "npyscreen-5.0.2.tar.gz", hash = "sha256:a8dbf425cb01ca28d2509483d37133223e8f4120d6c9890d33d75af55ee2beb6"},
 ]
 
 [[package]]
@@ -333,4 +334,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "07a83607ae5b67df517efa2de81206c65bd549b711949ece1bbae371a1481358"
+content-hash = "d774dbf8a6381e48a6de69397bd14b2c4849e11ee0f537bb3ea9ba1b45bb8349"
